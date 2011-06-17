@@ -4,7 +4,7 @@ Tags: term, terms, category, categories, terms ordering, categories sorting, sor
 Requires at least: 3.0
 Tested up to: 3.1.4
 Stable tag: 1.0-beta
-Submenu is a  WordPress plug-in that enhances the WordPress 3.x navigation system.
+Order your categories, tags or any other taxonomy's terms of your Wordpress website.
 
 == Description ==
 
