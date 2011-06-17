@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Gecka Terms Ordering
-Plugin URI: http://gecka-apps.com
-Description: Order you categories, tags or any other taxonomy of your Wordpress website
+Plugin URI: http://gecka-apps.com/wordpress-plugins/terms-ordering/
+Description: Order your categories, tags or any other taxonomy of your Wordpress website
 Version: 1.0-beta1
 Author: Gecka
 Author URI: http://gecka.nc

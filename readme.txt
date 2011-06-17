@@ -12,7 +12,7 @@ Have you ever wanted to sort your categories using drag and drop? Have you ever 
 
 Then, that plugin is for you. Using it you can enable categories custom ordering using drag and drop. But not only, you can set it to enable custom ordering of any other taxonomy's terms, even taxonomies created by other plugins.
 
-By default, drag and drop sorting is enabled for your posts categories. If you want to order any other taxonomy, go read <a href="http://gecka-apps.com/">the plugin's page on our website</a>.
+By default, drag and drop sorting is enabled for your posts categories. If you want to order any other taxonomy, go read <a href="http://gecka-apps.com/wordpress-plugins/terms-ordering/">the plugin's page on our website</a>.
 
 You would like to support us? Go over <a href="http://gecka-apps.com">at our website</a> and check our great premium plugins.
 
