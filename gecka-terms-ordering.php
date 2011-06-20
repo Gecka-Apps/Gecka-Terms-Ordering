@@ -9,6 +9,22 @@ Author URI: http://gecka.nc
 Licence: GPL
 */
 
+/*  Copyright 2011  Gecka Apps (email : contact@gecka-apps.com)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License, version 2, as 
+    published by the Free Software Foundation.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 $gecka_term_ordering = Gecka_Terms_Ordering::instance();
 
 class Gecka_Terms_Ordering {
@@ -271,9 +287,8 @@ class Gecka_Terms_Ordering {
 		
 		if( !(int)$term_id ) return;
 		
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->_termmeta} WHERE `_term_id` = " . (int) $term_id );
-		
+		delete_metadata('term', $term_id, 'order');
+	
 	}
 	
 	/**
