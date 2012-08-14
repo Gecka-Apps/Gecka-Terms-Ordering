@@ -288,7 +288,7 @@ class Gecka_Terms_Ordering {
 
 		foreach ( $children as $term ) {
 			$index ++;
-			$index = $this->set_term_order ( $term->term_id, $index, true );
+			$index = $this->set_term_order ( $term->term_id, $taxonomy, $index, true );
 		}
 
 		return $index;
