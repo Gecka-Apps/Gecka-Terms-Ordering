@@ -102,21 +102,29 @@ class Gecka_Terms_Ordering {
 
 		global $wpdb;
 
-		$collate = '';
-		if ( $wpdb->supports_collation() ) {
-			if ( ! empty( $wpdb->charset ) ) $collate = "DEFAULT CHARACTER SET $wpdb->charset";
-			if ( ! empty( $wpdb->collate ) ) $collate .= " COLLATE $wpdb->collate";
-		}
+		/**
+		 * Create the termmeta database table, for WordPress < version 4.4.
+		 *
+		 * The max index length is required since 4.2, because of the move to utf8mb4 collation.
+		 *
+		 * @see wp_get_db_schema()
+		 */
+		$charset_collate = $wpdb->get_charset_collate();
+		$table_name = $wpdb->prefix . "termmeta";
+		$max_index_length = 191;
 
-		$sql = "CREATE TABLE IF NOT EXISTS " . $wpdb->prefix . "termmeta" . " (
-						`meta_id` bigint(20) unsigned NOT NULL auto_increment,
-						`term_id` bigint(20) unsigned NOT NULL default '0',
-						`meta_key` varchar(255) default NULL,
-						`meta_value` longtext,
-						PRIMARY KEY (meta_id),
-						KEY term_id (term_id),
-						KEY meta_key (meta_key) ) $collate;";
-		$wpdb->query( $sql );
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+			meta_id bigint(20) unsigned NOT NULL auto_increment,
+			term_id bigint(20) unsigned NOT NULL default '0',
+			meta_key varchar(255) default NULL,
+			meta_value longtext,
+			PRIMARY KEY  (meta_id),
+			KEY term_id (term_id),
+			KEY meta_key (meta_key($max_index_length))
+		) $charset_collate;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
 	}
 
 	public function plugins_loaded() {
@@ -139,7 +147,9 @@ class Gecka_Terms_Ordering {
 
 	public function metadata_wpdbfix() {
 		global $wpdb;
-		$wpdb->termmeta = "{$wpdb->prefix}termmeta";
+		if ( ! isset( $wpdb->termmeta ) ) {
+			$wpdb->termmeta = "{$wpdb->prefix}termmeta";
+		}
 	}
 
 	/**
@@ -149,6 +159,7 @@ class Gecka_Terms_Ordering {
 		if ( ! isset( $_GET['taxonomy'] ) || ! self::has_support( $_GET['taxonomy'] ) ) return;
 
 		wp_register_script( 'gecka-terms-ordering', self::$plugin_url . '/javascripts/terms-ordering.js', array( 'jquery-ui-sortable' ) );
+
 		wp_enqueue_script( 'gecka-terms-ordering' );
 
 		wp_localize_script( 'gecka-terms-ordering', 'terms_order', array( 'taxonomy' => $_GET['taxonomy'] ) );
