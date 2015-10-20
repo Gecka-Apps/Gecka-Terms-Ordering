@@ -96,7 +96,7 @@ class Gecka_Terms_Ordering {
 	public function activation_hook() {
 		if ( version_compare( PHP_VERSION, '5.0.0', '<' ) ) {
 			deactivate_plugins( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ) ); // Deactivate ourself
-			wp_die( __("Sorry, the Gecka Terms Ordering plugin requires PHP 5 or higher.", 'gecka-terms-ordering') );
+			wp_die( __( "Sorry, the Gecka Terms Ordering plugin requires PHP 5 or higher.", 'gecka-terms-ordering' ) );
 		}
 
 		global $wpdb;
