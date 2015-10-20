@@ -50,16 +50,16 @@ class Gecka_Terms_Ordering {
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 
-		add_filter( 'terms_clauses', array( $this, 'terms_clauses' ) , 10, 3 );
+		add_filter( 'terms_clauses', array( $this, 'terms_clauses' ), 10, 3 );
 
-		add_action( 'created_term', array( $this, 'created_term' ) , 10, 3 );
+		add_action( 'created_term', array( $this, 'created_term' ), 10, 3 );
 
-		add_action( 'delete_term', array( $this, 'delete_term' ) , 10, 3 );
+		add_action( 'delete_term', array( $this, 'delete_term' ), 10, 3 );
 	}
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
-			$class_name = __CLASS__;
+			$class_name     = __CLASS__;
 			self::$instance = new $class_name;
 		}
 
@@ -72,7 +72,7 @@ class Gecka_Terms_Ordering {
 	 * @param string|array $taxonomy
 	 */
 	public static function add_taxonomy_support( $taxonomy ) {
-		$taxonomies = (array) $taxonomy;
+		$taxonomies       = (array) $taxonomy;
 		self::$taxonomies = array_merge( self::$taxonomies, $taxonomies );
 	}
 
@@ -83,12 +83,9 @@ class Gecka_Terms_Ordering {
 	 */
 	public static function remove_taxonomy_support( $taxonomy ) {
 		$key = array_search( $taxonomy, self::$taxonomies );
-		if ( false !== $key ) unset( self::$taxonomies[ $key ] );
-	}
-
-	public static function has_support( $taxonomy ) {
-		if ( in_array( $taxonomy, self::$taxonomies ) ) return true;
-		return false;
+		if ( false !== $key ) {
+			unset( self::$taxonomies[ $key ] );
+		}
 	}
 
 	/**
@@ -109,8 +106,8 @@ class Gecka_Terms_Ordering {
 		 *
 		 * @see wp_get_db_schema()
 		 */
-		$charset_collate = $wpdb->get_charset_collate();
-		$table_name = $wpdb->prefix . "termmeta";
+		$charset_collate  = $wpdb->get_charset_collate();
+		$table_name       = $wpdb->prefix . "termmeta";
 		$max_index_length = 191;
 
 		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
@@ -156,7 +153,9 @@ class Gecka_Terms_Ordering {
 	 * Load needed scripts to order categories in admin
 	 */
 	public function admin_enqueue_scripts() {
-		if ( ! isset( $_GET['taxonomy'] ) || ! self::has_support( $_GET['taxonomy'] ) ) return;
+		if ( ! isset( $_GET['taxonomy'] ) || ! self::has_support( $_GET['taxonomy'] ) ) {
+			return;
+		}
 
 		wp_register_script( 'gecka-terms-ordering', self::$plugin_url . '/javascripts/terms-ordering.js', array( 'jquery-ui-sortable' ) );
 
@@ -167,13 +166,26 @@ class Gecka_Terms_Ordering {
 		wp_print_scripts( 'gecka-terms-ordering' );
 	}
 
+	public static function has_support( $taxonomy ) {
+		if ( in_array( $taxonomy, self::$taxonomies ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public function admin_css() {
-		if ( ! isset( $_GET['taxonomy'] ) || ! self::has_support( $_GET['taxonomy'] ) ) return;
+		if ( ! isset( $_GET['taxonomy'] ) || ! self::has_support( $_GET['taxonomy'] ) ) {
+			return;
+		}
 
 		?>
-<style type="text/css">
-	.widefat .product-cat-placeholder { outline: 1px dotted #21759B; height: 60px; }
-</style>
+		<style type="text/css">
+			.widefat .product-cat-placeholder {
+				outline: 1px dotted #21759B;
+				height: 60px;
+			}
+		</style>
 		<?php
 	}
 
@@ -183,11 +195,13 @@ class Gecka_Terms_Ordering {
 	public function terms_ordering_httpr() {
 		global $wpdb;
 
-		$id = (int) $_POST['id'];
+		$id       = (int) $_POST['id'];
 		$next_id  = isset( $_POST['nextid'] ) && (int) $_POST['nextid'] ? (int) $_POST['nextid'] : null;
 		$taxonomy = isset( $_POST['taxonomy'] ) && $_POST['taxonomy'] ? $_POST['taxonomy'] : null;
 
-		if ( ! $id || ! $term = get_term_by( 'id', $id, $taxonomy ) ) die( 0 );
+		if ( ! $id || ! $term = get_term_by( 'id', $id, $taxonomy ) ) {
+			die( 0 );
+		}
 
 		$this->place_term( $term, $taxonomy, $next_id );
 
@@ -200,84 +214,7 @@ class Gecka_Terms_Ordering {
 	}
 
 	/**
-	 * Add term ordering suport to get_terms, set it as default
-	 *
-	 * It enables the support a 'menu_order' parameter to get_terms for the configured taxonomy.
-	 * By default it is 'ASC'. It accepts 'DESC' too
-	 *
-	 * To disable it, set it ot false (or 0)
-	 */
-	public function terms_clauses( $clauses, $taxonomies, $args ) {
-		global $wpdb;
-
-		$taxonomies = (array) $taxonomies;
-		if ( sizeof( $taxonomies === 1 ) ) $taxonomy = array_shift( $taxonomies );
-		else return $clauses;
-
-		if ( ! $this->has_support( $taxonomy ) ) return $clauses;
-
-		// fields
-		if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false ) $clauses['fields'] .= ', tm.meta_key, tm.meta_value ';
-
-		// join
-		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = 'order') ";
-
-		// order
-		if ( isset( $args['menu_order'] ) && ! $args['menu_order'] ) return $clauses; // menu_order is false whe do not add order clause
-
-		// default to ASC
-		if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ) ) ) $args['menu_order'] = 'ASC';
-
-		$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
-
-		if ( $clauses['orderby'] )
-			$clauses['orderby'] = str_replace( 'ORDER BY', $order . ',', $clauses['orderby'] );
-		else
-			$clauses['orderby'] = $order;
-
-		return $clauses;
-	}
-
-	/**
-	 * Reorder on term insertion
-	 *
-	 * @param int $term_id
-	 */
-	public function created_term( $term_id, $tt_id, $taxonomy ) {
-		if ( ! $this->has_support( $taxonomy ) ) return;
-
-		$next_id = null;
-
-		$term = get_term( $term_id, $taxonomy );
-
-		// gets the sibling terms
-		$siblings = get_terms( $taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0" );
-
-		foreach ( $siblings as $sibling ) {
-			if ( $sibling->term_id == $term_id ) continue;
-			$next_id = $sibling->term_id; // first sibling term of the hierachy level
-			break;
-		}
-
-		// reorder
-		$this->place_term( $term, $taxonomy, $next_id );
-	}
-
-	/**
-	 * Delete terms metas on deletion
-	 *
-	 * @param int $term_id
-	 */
-	public function delete_term( $term_id, $tt_id, $taxonomy ) {
-		if ( ! $this->has_support( $taxonomy ) ) return;
-
-		if ( ! (int) $term_id ) return;
-
-		delete_metadata( 'term', $term_id, 'order' );
-	}
-
-	/**
-	 * Move a term before the a	given element of its hierachy level
+	 * Move a term before the a    given element of its hierachy level
 	 *
 	 * @param object $the_term
 	 * @param int $next_id the id of the next slibling element in save hierachy level
@@ -285,10 +222,14 @@ class Gecka_Terms_Ordering {
 	 * @param int $terms
 	 */
 	private function place_term( $the_term, $taxonomy, $next_id, $index = 0, $terms = null ) {
-		if ( ! $terms ) $terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
-		if ( empty( $terms ) ) return $index;
+		if ( ! $terms ) {
+			$terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
+		}
+		if ( empty( $terms ) ) {
+			return $index;
+		}
 
-		$id	= $the_term->term_id;
+		$id = $the_term->term_id;
 
 		$term_in_level = false; // flag: is our term to order in this level of terms
 
@@ -313,8 +254,9 @@ class Gecka_Terms_Ordering {
 		}
 
 		// no nextid meaning our term is in last position
-		if ( $term_in_level && null === $next_id )
+		if ( $term_in_level && null === $next_id ) {
 			$index = $this->set_term_order( $id, $taxonomy, $index + 1, true );
+		}
 
 		return $index;
 	}
@@ -334,16 +276,119 @@ class Gecka_Terms_Ordering {
 
 		update_metadata( 'term', $term_id, 'order', $index );
 
-		if ( ! $recursive ) return $index;
+		if ( ! $recursive ) {
+			return $index;
+		}
 
 		$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
 
 		foreach ( $children as $term ) {
-			$index++;
+			$index ++;
 			$index = $this->set_term_order( $term->term_id, $taxonomy, $index, true );
 		}
 
 		return $index;
+	}
+
+	/**
+	 * Add term ordering suport to get_terms, set it as default
+	 *
+	 * It enables the support a 'menu_order' parameter to get_terms for the configured taxonomy.
+	 * By default it is 'ASC'. It accepts 'DESC' too
+	 *
+	 * To disable it, set it ot false (or 0)
+	 */
+	public function terms_clauses( $clauses, $taxonomies, $args ) {
+		global $wpdb;
+
+		$taxonomies = (array) $taxonomies;
+		if ( sizeof( $taxonomies === 1 ) ) {
+			$taxonomy = array_shift( $taxonomies );
+		} else {
+			return $clauses;
+		}
+
+		if ( ! $this->has_support( $taxonomy ) ) {
+			return $clauses;
+		}
+
+		// fields
+		if ( strpos( 'COUNT(*)', $clauses['fields'] ) === false ) {
+			$clauses['fields'] .= ', tm.meta_key, tm.meta_value ';
+		}
+
+		// join
+		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = 'order') ";
+
+		// order
+		if ( isset( $args['menu_order'] ) && ! $args['menu_order'] ) {
+			return $clauses;
+		} // menu_order is false whe do not add order clause
+
+		// default to ASC
+		if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array(
+				'ASC',
+				'DESC'
+			) )
+		) {
+			$args['menu_order'] = 'ASC';
+		}
+
+		$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
+
+		if ( $clauses['orderby'] ) {
+			$clauses['orderby'] = str_replace( 'ORDER BY', $order . ',', $clauses['orderby'] );
+		} else {
+			$clauses['orderby'] = $order;
+		}
+
+		return $clauses;
+	}
+
+	/**
+	 * Reorder on term insertion
+	 *
+	 * @param int $term_id
+	 */
+	public function created_term( $term_id, $tt_id, $taxonomy ) {
+		if ( ! $this->has_support( $taxonomy ) ) {
+			return;
+		}
+
+		$next_id = null;
+
+		$term = get_term( $term_id, $taxonomy );
+
+		// gets the sibling terms
+		$siblings = get_terms( $taxonomy, "parent={$term->parent}&menu_order=ASC&hide_empty=0" );
+
+		foreach ( $siblings as $sibling ) {
+			if ( $sibling->term_id == $term_id ) {
+				continue;
+			}
+			$next_id = $sibling->term_id; // first sibling term of the hierachy level
+			break;
+		}
+
+		// reorder
+		$this->place_term( $term, $taxonomy, $next_id );
+	}
+
+	/**
+	 * Delete terms metas on deletion
+	 *
+	 * @param int $term_id
+	 */
+	public function delete_term( $term_id, $tt_id, $taxonomy ) {
+		if ( ! $this->has_support( $taxonomy ) ) {
+			return;
+		}
+
+		if ( ! (int) $term_id ) {
+			return;
+		}
+
+		delete_metadata( 'term', $term_id, 'order' );
 	}
 }
 
