@@ -30,6 +30,9 @@
 
 $gecka_term_ordering = Gecka_Terms_Ordering::instance();
 
+/**
+ * Class Gecka_Terms_Ordering
+ */
 class Gecka_Terms_Ordering {
 	private static $instance;
 
@@ -59,6 +62,10 @@ class Gecka_Terms_Ordering {
 		add_action( 'delete_term', array( $this, 'delete_term' ), 10, 3 );
 	}
 
+	/**
+	 * Singleton pattern
+	 * @return Gecka_Terms_Ordering
+	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			$class_name     = __CLASS__;
