@@ -3,9 +3,10 @@
  * Plugin Name: Gecka Terms Ordering
  * Plugin URI: http://gecka-apps.com/wordpress-plugins/terms-ordering/
  * Description: Order your categories, tags or any other taxonomy of your Wordpress website
- * Version: 1.0-beta1
+ * Version: 1.0-beta2
  * Author: Gecka
  * Author URI: http://gecka.nc
+ * Text Domain: gecka-terms-ordering
  * Licence: GPL
  */
 
