@@ -1,9 +1,9 @@
 === Gecka Terms Ordering ===
-Contributors: Gecka Apps
+Contributors: Gecka Apps, Gecka
 Tags: term, terms, category, categories, terms ordering, categories sorting, sort categories, categories order, categories ordering, category order, taxonomy order, taxonomies order
 Requires at least: 3.0
-Tested up to: 3.1.4
-Stable tag: 1.0-beta
+Tested up to: 4.4
+Stable tag: 1.0-beta2
 Order your categories, tags or any other taxonomy's terms of your Wordpress website.
 
 == Description ==
@@ -30,6 +30,10 @@ Want to contribute? That plugin is on <a href="https://github.com/Gecka-Apps/Gec
 1. In action
 
 == Changelog ==
+
+= 1.0-beta2 =
+* Localization support.
+* Support up to 4.4
 
 = 1.0-beta1 =
 * First release.
