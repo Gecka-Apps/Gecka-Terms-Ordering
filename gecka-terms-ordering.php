@@ -7,6 +7,7 @@
  * Author: Gecka
  * Author URI: http://gecka.nc
  * Text Domain: gecka-terms-ordering
+ * Domain Path: /languages
  * Licence: GPL
  */
 
@@ -95,7 +96,7 @@ class Gecka_Terms_Ordering {
 	public function activation_hook() {
 		if ( version_compare( PHP_VERSION, '5.0.0', '<' ) ) {
 			deactivate_plugins( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ) ); // Deactivate ourself
-			wp_die( "Sorry, the Gecka Terms Ordering plugin requires PHP 5 or higher." );
+			wp_die( __("Sorry, the Gecka Terms Ordering plugin requires PHP 5 or higher.", 'gecka-terms-ordering') );
 		}
 
 		global $wpdb;
@@ -127,6 +128,7 @@ class Gecka_Terms_Ordering {
 
 	public function plugins_loaded() {
 		self::$taxonomies = apply_filters( 'term-ordering-default-taxonomies', self::$taxonomies );
+		load_plugin_textdomain( 'gecka-terms-ordering', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 	}
 
 	public function after_setup_theme() {
@@ -215,7 +217,7 @@ class Gecka_Terms_Ordering {
 	}
 
 	/**
-	 * Move a term before the a    given element of its hierachy level
+	 * Move a term before a given element of its hierachy level
 	 *
 	 * @param object $the_term
 	 * @param int $next_id the id of the next slibling element in save hierachy level
