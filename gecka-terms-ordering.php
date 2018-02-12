@@ -344,12 +344,13 @@ class Gecka_Terms_Ordering {
 			$args['menu_order'] = 'ASC';
 		}
 
-		$order = "ORDER BY CAST(tm.meta_value AS SIGNED) " . $args['menu_order'];
+		$order = "ORDER BY CAST(tm.meta_value AS SIGNED)";
 
 		if ( $clauses['orderby'] ) {
-			$clauses['orderby'] = str_replace( 'ORDER BY', $order . ',', $clauses['orderby'] );
+			$clauses['orderby'] = str_replace( 'ORDER BY', $order . ' ' . $args['menu_order'] . ',', $clauses['orderby'] );
 		} else {
 			$clauses['orderby'] = $order;
+			$clauses['order'] = $args['menu_order'];
 		}
 
 		return $clauses;
