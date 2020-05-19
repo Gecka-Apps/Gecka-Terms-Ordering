@@ -312,7 +312,7 @@ class Gecka_Terms_Ordering {
 		global $wpdb;
 
 		$taxonomies = (array) $taxonomies;
-		if ( sizeof( $taxonomies === 1 ) ) {
+		if ( sizeof( $taxonomies ) === 1 ) {
 			$taxonomy = array_shift( $taxonomies );
 		} else {
 			return $clauses;
